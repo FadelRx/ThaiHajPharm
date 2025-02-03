@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการข้อมูลคนไข้</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Itim', sans-serif;
+      background-color: #f8f9fa;
+      background-size: cover;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-section {
+      background-color: #e9f7ef;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .form-title {
+      font-size: 1.5rem;
+      color: #28a745;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #495057;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-primary {
+      background-color: #28a745;
+      border: none;
+    }
+    .btn-secondary {
+      background-color: #ffc107;
+      border: none;
+    }
+
+    h2, h3, h4 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .btn-primary:hover {
+      background-color: #283593;
+      border-color: #283593;
+    }
+    .btn-success {
+      background-color: #2e7d32;
+      border-color: #2e7d32;
+    }
+    .btn-success:hover {
+      background-color: #1b5e20;
+      border-color: #1b5e20;
+    }
+    .btn-danger {
+      background-color: #c62828;
+      border-color: #c62828;
+    }
+    .btn-danger:hover {
+      background-color: #b71c1c;
+      border-color: #b71c1c;
+    }
+    .table-bordered th {
+      background-color: #eceff1;
+      color: #37474f;
+      text-align: center;
+    }
+    /* ตั้งค่าฟอนต์สำหรับตาราง */
+    table {
+      font-size: 14px; /* ขนาดฟอนต์สำหรับข้อความในตาราง */
+    }
+    
+    /* เพิ่มความสม่ำเสมอสำหรับเซลล์ในตาราง */
+    table td, table th {
+      font-size: 14px; /* ขนาดฟอนต์สำหรับทั้งส่วนหัวและข้อมูล */
+      vertical-align: middle; /* จัดข้อความให้อยู่ตรงกลางแนวตั้ง */
+    }
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      color: #607d8b;
+      font-size: 14px;
+    }
+    .form-select {
+      background-color: #e3f2fd;
+      border-radius: 8px;
+    }
+    .form-control {
+      background-color: #fafafa;
+      border-radius: 8px;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #37474f;
+    }
+    .status-circle {
+      display: inline-block;
+      width: 20px; /* กำหนดขนาดวงกลม */
+      height: 20px;
+      border-radius: 50%; /* ทำให้เป็นวงกลม */
+      margin-right: 8px; /* เว้นระยะห่างจากข้อความ */
+    }
+
+    .status-green { background-color: green; }
+    .status-yellow { background-color: orange; }
+    .status-red { background-color: red; }
+    .status-gray { background-color: gray; }
+    .table tbody td {
+      text-align: center; /* ทำให้ข้อมูลในตารางอยู่ตรงกลาง */
+      vertical-align: middle; /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
+    }
+    .warning-icon {
+      display: inline-block;
+      color: red;
+      font-size: 16px;
+      animation: blink 1s infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .header-container {
+      display: flex;
+      align-items: center; /* จัดให้อยู่ตรงกลางในแนวตั้ง */
+      justify-content: space-between; /* เว้นระยะห่างระหว่างโลโก้และหัวข้อ */
+      padding: 10px;
+    }
+
+    .logo-left, .logo-right {
+      width: 100px; /* ขนาดของโลโก้ */
+      height: auto;
+    }
+
+    .header-title {
+      text-align: center;
+      flex-grow: 1; /* ขยายส่วนหัวข้อให้อยู่ตรงกลาง */
+    }
+    /* Media Queries สำหรับหน้าจอเล็ก */
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: column; /* จัดเรียงเป็นคอลัมน์ในหน้าจอเล็ก */
+      text-align: center;
+    }
+
+    .logo {
+      width: 50px; /* ลดขนาดโลโก้ */
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+    }
+
+    .container {
+      padding: 10px; /* ลดระยะขอบ */
+    }
+  }
+
+  /* Media Queries สำหรับหน้าจอมือถือ */
+  @media (max-width: 480px) {
+    .logo {
+      width: 40px; /* ลดขนาดโลโก้ลงอีก */
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+
+    .container {
+      padding: 5px;
+    }
+  }
+
+  .statistics-section {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+  }
+
+  .statistics-section.compact {
+    padding: 5px;
+    font-size: 14px;
+  }
+
+  .statistics-section h5 {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #343a40;
+  }
+  .statistics-section p {
+    margin: 0;
+    font-size: 12px;
+  }
+  .form-control-sm {
+    font-size: 12px;
+    height: 30px;
+    padding: 5px;
+  }
+  .btn-sm {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header-container">
+      <!-- โลโก้ด้านซ้าย -->
+      <img src="https://img5.pic.in.th/file/secure-sv1/images-23439ca393195fba9.jpg" class="logo-left" alt="Logo Left">
+      
+      <!-- หัวข้อ -->
+      <div class="header-title">
+        <h2>Drug-Related Problem Monitoring System</h2>
+        <p class="text-center" style="color: #37474f;">ระบบตรวจสอบและติดตามปัญหาด้านยาฮุจญาต</p>
+      </div>
+      
+      <!-- โลโก้ด้านขวา -->
+      <img src="https://img2.pic.in.th/pic/Untitled-design-17d64178ea3e904b6.png" class="logo-right" alt="Logo Right">
+    </div>
+
+    <!-- Login Section -->
+    <div id="loginSection">
+      <h3 class="text-center">เข้าสู่ระบบ</h3>
+      <div class="mb-3">
+        <label class="form-label">ชื่อผู้ใช้:</label>
+        <input type="text" id="username" class="form-control" placeholder="กรอกชื่อผู้ใช้">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">รหัสผ่าน:</label>
+        <input type="password" id="password" class="form-control" placeholder="กรอกรหัสผ่าน">
+      </div>
+      <button onclick="login()" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+      <!-- <button onclick="showRegister()" class="btn btn-secondary w-100 mt-2">ลงทะเบียน</button> -->
+    </div>
+
+    <!-- <div id="registerSection" style="display: none;">
+      <h3>ลงทะเบียนผู้ใช้</h3>
+      <div class="mb-3">
+        <label for="regUsername" class="form-label">ชื่อผู้ใช้:</label>
+        <input type="text" id="regUsername" class="form-control" placeholder="กรอกชื่อผู้ใช้">
+      </div>
+      <div class="mb-3">
+        <label for="regPassword" class="form-label">รหัสผ่าน:</label>
+        <input type="password" id="regPassword" class="form-control" placeholder="รหัสต้องประกอบด้วยตัวอักษรและตัวเลข">
+      </div>
+      <div class="mb-3">
+        <label for="regHospital" class="form-label">โรงพยาบาล:</label>
+        <select id="regHospital" class="form-select">
+          <option value="">-- กรุณาเลือกโรงพยาบาล --</option>
+        </select>
+      </div>
+      <button onclick="registerUser()" class="btn btn-success w-100">ลงทะเบียน</button>
+      <button onclick="showLogin()" class="btn btn-secondary w-100 mt-2">กลับไปหน้าเข้าสู่ระบบ</button>
+    </div> -->
+    
+    <!-- Main Section -->
+    <div id="mainSection" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3>ยินดีต้อนรับ: <span id="loggedInUser"></span></h3>
+        <div>
+          <button onclick="openAddForm()" class="btn btn-success btn-sm">เพิ่มข้อมูล</button>
+          <button onclick="logout()" class="btn btn-danger btn-sm">ออกจากระบบ</button>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <input
+            type="text"
+            id="searchPatient"
+            class="form-control"
+            placeholder="ค้นหาชื่อคนไข้หรือข้อมูลอื่น ๆ"
+            onkeyup="filterPatients()"
+          />
+        </div>
+        <div class="col-md-4">
+          <select id="filterStatus" class="form-select" onchange="filterPatients()">
+            <option value="">กรองตามสถานะสุขภาพ</option>
+            <option value="เขียว">เขียว</option>
+            <option value="เหลือง">เหลือง</option>
+            <option value="แดง">แดง</option>
+            <option value="เทา">เทา</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select id="filterDrugIssues" class="form-select" onchange="filterPatients()">
+            <option value="">กรองตามปัญหาการใช้ยา</option>
+            <option value="ADR">ADR</option>
+            <option value="DI">DI</option>
+            <option value="Subtherapeutic">Subtherapeutic</option>
+            <option value="Overdose">Overdose</option>
+            <option value="Duplicate">Duplicate</option>
+            <option value="Untreated indications">Untreated indications</option>
+            <option value="Improper drug selection">Improper drug selection</option>
+            <option value="Failure to receive drug">Failure to receive drug</option>
+            <option value="Drug use without indication">Drug use without indication</option>
+            <option value="do not ADR monitoring">do not ADR monitoring</option>
+            
+          </select>
+        </div>
+      </div>
+
+
+      <!-- Add Button -->
+      <div class="mt-4">
+        <div class="statistics-section compact">
+          <h5 class="text-center">ข้อมูลผู้แสวงบุญ</h5>
+          <div class="row text-center">
+            <div class="col-2">
+              <p><strong>🌍 ฮุจญาตทั้งหมด</strong></p>
+              <span id="totalPilgrims">6600</span><span>คน</span>
+            </div>
+            <div class="col-2">
+              <p><strong>👥 ฮุจญาตในพื้นที่</strong></p>
+              <span id="pilgrimsInCharge">0</span><span>คน</span>
+            </div>
+            <div class="col-2">
+              <p><strong>🔍 ฮุจญาตที่คัดกรอง</strong></p>
+              <span id="pilgrimsScreened">0</span><span>คน</span>
+            </div>
+            <div class="col-2">
+              <p><strong>📊 %ฮุจญาตในพื้นที่/ทั้งหมด</strong></p>
+              <span id="responsiblePercentage">0%</span>
+            </div>
+            <div class="col-2">
+              <p><strong>✅ %คัดกรอง/ในพื้นที่</strong></p>
+              <span id="screenedPercentage">0%</span>
+            </div>
+            <div class="col-2">
+              <p><strong>🌟 %คัดกรอง/ทั้งหมด</strong></p>
+              <span id="screenedTotalPercentage">0%</span>
+            </div>
+          </div>
+          <div class="row mt-2" id="editInputs" style="display: none;">
+            <div class="col-6">
+              <input type="number" id="editPilgrimsInCharge" class="form-control form-control-sm" placeholder="แก้ไขรับผิดชอบ">
+            </div>
+            <div class="col-6">
+              <input type="number" id="editPilgrimsScreened" class="form-control form-control-sm" placeholder="แก้ไขคัดกรอง">
+            </div>
+            <button onclick="updatePilgrimData()" class="btn btn-sm btn-primary mt-3">บันทึก</button>
+          </div>
+          <div class="text-center mt-2">
+            <div class="text-center mt-2">
+              <button class="btn btn-primary btn-sm " onclick="toggleEditInputs()">คัดกรอง</button>
+              <button onclick="showPilgrimChart()" class="btn btn-sm btn-secondary">แสดงกราฟ</button>
+            </div>
+          </div>
+        </div>
+        <p id="filteredCount" class="text-center">แสดงผลคนไข้ทั้งหมด: 0</p>
+        
+        <!-- Table -->
+        <div class="table-responsive mt-3">
+           <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="width: 15%;">ชื่อ</th>
+                <th style="width: 20%;">โรงพยาบาล</th>
+                <th style="width: 10%;">สถานะสุขภาพ</th>
+                <th style="width: 15%;">ปัญหาการใช้ยา</th>
+                <th style="width: 40%;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="patientsTable"></tbody>
+          </table>
+
+          <!-- Modal -->
+            <div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="patientModalLabel">รายละเอียดคนไข้</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <!-- เนื้อหาของ Modal -->
+                    <p id="patientDetails"></p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="careDetailsModal" tabindex="-1" aria-labelledby="careDetailsModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="careDetailsModalLabel">ประวัติการบริบาลทางเภสัชกรรม</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body" id="careDetailsContent">
+                    <!-- เนื้อหาของ Modal จะถูกเพิ่มที่นี่ -->
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Form -->
+   <div id="formSection" class="form-section" style="display:none;">
+      <h4 id="formTitle" class="form-title">ข้อมูลคนไข้</h4>
+      <div class="form-group">
+        <label class="form-label">ชื่อ:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-user"></i></span>
+          <input type="text" id="name" class="form-control" placeholder="กรอกชื่อคนไข้">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ที่อยู่:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+          <input type="text" id="address" class="form-control" placeholder="กรอกที่อยู่">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">โรงพยาบาล:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-hospital"></i></span>
+          <input type="text" id="hospital" class="form-control" placeholder="โรงพยาบาลที่รับบริการ" readonly>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">สถานะสุขภาพ:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-heartbeat"></i></span>
+          <select id="status" class="form-select">
+            <option value="" disabled selected>เลือกสถานะสุขภาพ</option>
+            <option value="เขียว">เขียว</option>
+            <option value="เหลือง">เหลือง</option>
+            <option value="แดง">แดง</option>
+            <option value="เทา">เทา</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">โรคประจำตัว:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-diagnoses"></i></span>
+          <input type="text" id="disease" class="form-control" placeholder="กรอกโรคประจำตัว">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">อาการ:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-stethoscope"></i></span>
+          <input type="text" id="symptoms" class="form-control" placeholder="กรอกอาการของผู้ป่วย">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">บริษัท:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-building"></i></span>
+          <input type="text" id="company" class="form-control" placeholder="กรอกชื่อบริษัท">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="drugIssues" class="form-label">ปัญหาการใช้ยา:</label>
+        <div id="drugIssuesContainer" class="form-check">
+          <div class="form-check">
+            <input type="checkbox" id="issueADR" value="ADR" class="form-check-input">
+            <label for="issueADR" class="form-check-label">ADR</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueDI" value="DI" class="form-check-input">
+            <label for="issueDI" class="form-check-label">DI</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueSubtherapeutic" value="Subtherapeutic" class="form-check-input">
+            <label for="issueSubtherapeutic" class="form-check-label">Subtherapeutic</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueOverdose" value="Overdose" class="form-check-input">
+            <label for="issueOverdose" class="form-check-label">Overdose</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueDuplicate" value="Duplicate" class="form-check-input">
+            <label for="issueDuplicate" class="form-check-label">Duplicate</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueUntreated indications" value="Untreated indications" class="form-check-input">
+            <label for="issueUntreated indications" class="form-check-label">Untreated indications</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueImproper drug selection" value="Improper drug selection" class="form-check-input">
+            <label for="issueImproper drug selection" class="form-check-label">Improper drug selection</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueFailure to receive drug" value="Failure to receive drug" class="form-check-input">
+            <label for="issueFailure to receive drug" class="form-check-label">Failure to receive drug</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issueDrug use without indication" value="Drug use without indication" class="form-check-input">
+            <label for="issueDrug use without indication" class="form-check-label">Drug use without indication</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="issuedo not ADR monitoring" value="do not ADR monitoring" class="form-check-input">
+            <label for="issuedo not ADR monitoring" class="form-check-label">do not ADR monitoring</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รายละเอียด:</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+          <textarea id="detail" class="form-control" placeholder="กรอกรายละเอียดเพิ่มเติม"></textarea>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button onclick="savePatient()" class="btn btn-success">บันทึก</button>
+        <button onclick="cancelForm()" class="btn btn-secondary">ยกเลิก</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      &copy; DPRMS | ออกแบบโดย FadelRx
+    </footer>
+  </div>
+  
+  <script>
+    let currentUser = null;
+    let patients = [];
+    let editingIndex = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      Swal.fire({
+        title: 'กำลังโหลด...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      // โหลดฟังก์ชันเริ่มต้น เช่น การตรวจสอบสถานะผู้ใช้
+      setTimeout(() => {
+        Swal.close(); // ปิด SweetAlert เมื่อโหลดเสร็จ
+      }, 2000);
+    });
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      Swal.fire({
+        title: 'กำลังเข้าสู่ระบบ...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      google.script.run.withSuccessHandler(response => {
+        Swal.close();
+        if (response.success) {
+          currentUser = response.user; // กำหนดค่า currentUser
+          document.getElementById('loggedInUser').textContent = currentUser.hospital;
+          document.getElementById('loginSection').style.display = 'none';
+          document.getElementById('mainSection').style.display = 'block';
+
+          loadPatients(); // โหลดข้อมูลคนไข้
+          loadUserStatistics(); // โหลดข้อมูลผู้แสวงบุญ
+        } else {
+          Swal.fire('เข้าสู่ระบบล้มเหลว', 'กรุณาตรวจสอบชื่อผู้ใช้และรหัสผ่าน', 'error');
+        }
+      }).login(username, password);
+    }
+
+    function loadPatients() {
+      Swal.fire({
+        title: 'กำลังโหลดข้อมูลคนไข้...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      google.script.run.withSuccessHandler(data => {
+        Swal.close(); // ปิด SweetAlert เมื่อโหลดเสร็จ
+        patients = data;
+        renderPatientsTable();
+      }).getPatients(currentUser);
+    }
+
+
+     // เพิ่มช่อง "รายละเอียด" ในการ render ตาราง
+    function renderPatientsTable() {
+      const tableBody = document.getElementById("patientsTable");
+      tableBody.innerHTML = "";
+
+      let totalPatientsCount = 0; // ตัวแปรสำหรับนับจำนวนคนไข้ทั้งหมดที่ไม่ใช่ Group By
+
+      const groupedPatients = patients.reduce((groups, patient) => {
+        if (!groups[patient.hospital]) {
+          groups[patient.hospital] = [];
+        }
+        groups[patient.hospital].push(patient);
+        return groups;
+      }, {});
+
+      Object.keys(groupedPatients).forEach(hospital => {
+        const groupHeaderRow = document.createElement("tr");
+        groupHeaderRow.setAttribute('data-group', 'true'); // ระบุว่าแถวนี้คือ Group By
+        groupHeaderRow.innerHTML = `
+          <td colspan="5" style="background-color: #eceff1; font-weight: bold; text-align: left;">
+            โรงพยาบาล: ${hospital}
+          </td>
+        `;
+        tableBody.appendChild(groupHeaderRow);
+
+        groupedPatients[hospital].forEach((patient, index) => {
+          const row = document.createElement("tr");
+
+          let statusClass = '';
+          let warningIcon = '';
+          switch (patient.status) {
+            case 'เขียว':
+              statusClass = 'status-green';
+              break;
+            case 'เหลือง':
+              statusClass = 'status-yellow';
+              break;
+            case 'แดง':
+              statusClass = 'status-red';
+              warningIcon = `<span class="warning-icon">⚠️</span>`;
+              break;
+            case 'เทา':
+              statusClass = 'status-gray';
+              warningIcon = `<span class="warning-icon">⚠️</span>`;
+              break;
+          }
+
+          row.innerHTML = `
+            <td>${patient.name}</td>
+            <td>${patient.hospital}</td>
+            <td><span class="status-circle ${statusClass}"></span>${patient.status} ${warningIcon}</td>
+            <td>${patient.drugIssues.replace(/, /g, ', ')}</td> <!-- แสดงทีละบรรทัด -->
+            <td>
+              <button class="btn btn-info btn-sm me-2" onclick="showPatientDetails(${index})">รายละเอียด</button>
+              <button class="btn btn-success btn-sm me-2" onclick="openCareForm(${index})">Pharm Care+</button>
+              <button class="btn btn-secondary btn-sm" onclick="viewCareDetails(${index})">Care Detail</button>
+              ${
+                currentUser.hospital !== 'Admin'
+                  ? `
+                  <button class="btn btn-warning btn-sm me-2" onclick="editPatient(${index})">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="deletePatient(${index})">ลบ</button>
+                  `
+                  : ''
+              }
+            </td>
+          `;
+          tableBody.appendChild(row);
+
+          totalPatientsCount++; // เพิ่มจำนวนคนไข้เมื่อเพิ่มแถว
+        });
+      });
+
+      // อัปเดตจำนวนคนไข้ทั้งหมดใน DOM
+      document.getElementById('filteredCount').textContent = `จำนวนคนไข้ที่เกิด DRP: ${totalPatientsCount}`;
+    }
+
+    // ฟังก์ชันแสดง Modal พร้อมข้อมูล
+    function showPatientDetails(index) {
+      const patient = patients[index];
+      const modal = new bootstrap.Modal(document.getElementById("patientModal"));
+      document.getElementById("patientDetails").innerHTML = `
+        <strong>ชื่อ:</strong> ${patient.name}<br>
+        <strong>โรงพยาบาล:</strong> ${patient.hospital}<br>
+        <strong>ที่อยู่:</strong> ${patient.address}<br>
+        <strong>สถานะสุขภาพ:</strong> ${patient.status}<br>
+        <strong>โรคประจำตัว:</strong> ${patient.disease}<br>
+        <strong>อาการ:</strong> ${patient.symptoms}<br>
+        <strong>บริษัท:</strong> ${patient.company}<br>
+        <strong>ปัญหาการใช้ยา:</strong> ${patient.drugIssues}<br>
+        <strong>รายละเอียด:</strong> ${patient.detail}
+      `;
+      modal.show();
+    }
+
+    function openAddForm() {
+      editingIndex = null;
+      document.getElementById('formSection').style.display = 'block';
+      document.getElementById('mainSection').style.display = 'none';
+      document.getElementById('formTitle').textContent = 'เพิ่มข้อมูลคนไข้';
+    }
+
+    // เพิ่ม "รายละเอียด" ในฟังก์ชัน editPatient
+    function editPatient(index) {
+      const patient = patients[index];
+
+      document.getElementById('name').value = patient.name;
+      document.getElementById('address').value = patient.address;
+      document.getElementById('hospital').value = patient.hospital;
+      document.getElementById('status').value = patient.status;
+      document.getElementById('disease').value = patient.disease;
+      document.getElementById('symptoms').value = patient.symptoms;
+      document.getElementById('company').value = patient.company;
+
+      const selectedIssues = patient.drugIssues.split(', '); // แปลงค่ากลับเป็นอาร์เรย์
+      document.querySelectorAll('#drugIssuesContainer input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = selectedIssues.includes(checkbox.value); // ติ๊ก Checkbox ที่ตรงกับข้อมูล
+      });
+
+      document.getElementById('detail').value = patient.detail || '';
+
+      editingIndex = index; // เก็บ index สำหรับการแก้ไข
+      document.getElementById('formSection').style.display = 'block';
+      document.getElementById('mainSection').style.display = 'none';
+    }
+
+    function deletePatient(index) {
+      const patient = patients[index];
+
+      Swal.fire({
+        title: 'ยืนยันการลบ?',
+        text: 'คุณต้องการลบข้อมูลนี้หรือไม่?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'กำลังลบข้อมูล...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          });
+
+          // เรียกใช้ Google Apps Script เพื่อลบข้อมูล
+          google.script.run.withSuccessHandler(response => {
+            Swal.close();
+            if (response.success) {
+              patients.splice(index, 1); // ลบข้อมูลจากอาเรย์ในฝั่งหน้าเว็บ
+              renderPatientsTable(); // รีเฟรชตาราง
+              Swal.fire('สำเร็จ!', 'ข้อมูลถูกลบเรียบร้อยแล้ว', 'success');
+            } else {
+              Swal.fire('ล้มเหลว', response.message, 'error');
+            }
+          }).deletePatient(patient.uniqueId);
+        }
+      });
+    }
+
+    // เพิ่ม "รายละเอียด" ในฟังก์ชัน savePatient
+      function savePatient() {
+      if (currentUser.hospital === 'Admin') {
+        Swal.fire("ไม่อนุญาต", "แอดมินไม่สามารถเพิ่มหรือแก้ไขข้อมูลได้", "warning");
+        return;
+      }
+
+      const selectedIssues = Array.from(document.querySelectorAll('#drugIssuesContainer input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value); // ดึงค่าจาก Checkbox ที่ถูกติ๊ก
+
+      const patient = {
+        uniqueId: editingIndex !== null ? patients[editingIndex].uniqueId : null, // ใช้ UniqueID เดิมถ้าแก้ไข
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        hospital: currentUser.hospital || 'Admin',
+        status: document.getElementById('status').value,
+        disease: document.getElementById('disease').value,
+        symptoms: document.getElementById('symptoms').value,
+        company: document.getElementById('company').value,
+        drugIssues: selectedIssues.join(', '), // เก็บค่าที่เลือกคั่นด้วยคอมมา
+        detail: document.getElementById('detail').value,
+      };
+
+      if (editingIndex !== null) {
+        patients[editingIndex] = patient; // อัปเดตข้อมูลในอาเรย์
+      } else {
+        patient.uniqueId = generateUniqueId(); // สร้าง UniqueID ใหม่
+        patients.push(patient); // เพิ่มข้อมูลใหม่ในอาเรย์
+      }
+
+      Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      google.script.run.withSuccessHandler(() => {
+        Swal.close();
+        renderPatientsTable();
+        clearForm();
+        cancelForm();
+        Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+      }).savePatients(patients, currentUser);
+    }
+
+    // ฟังก์ชันสร้าง UniqueID ในฝั่ง JavaScript (ถ้าจำเป็น)
+    function generateUniqueId() {
+      return 'H' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function cancelForm() {
+      document.getElementById('formSection').style.display = 'none';
+      document.getElementById('mainSection').style.display = 'block';
+      clearForm();
+    }
+
+    function logout() {
+      currentUser = null; // รีเซ็ตตัวแปร currentUser
+      document.getElementById("loginSection").style.display = "block"; // แสดงส่วน login
+      document.getElementById("mainSection").style.display = "none"; // ซ่อนส่วนหลัก
+      document.getElementById("formSection").style.display = "none"; // ซ่อนส่วนฟอร์ม (ถ้ามีการเปิดฟอร์ม)
+      
+      Swal.fire({
+        title: 'ออกจากระบบสำเร็จ',
+        icon: 'success',
+        confirmButtonText: 'ตกลง'
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('name').value = '';
+      document.getElementById('address').value = '';
+      document.getElementById('hospital').value = currentUser.hospital || 'Admin';
+      document.getElementById('status').value = 'เขียว'; // ตั้งค่าเริ่มต้น
+      document.getElementById('disease').value = '';
+      document.getElementById('symptoms').value = '';
+      document.getElementById('company').value = '';
+      document.getElementById('detail').value = '';
+
+      // เช็คหาก 'drugIssuesContainer' มีอยู่ใน DOM
+      const drugIssuesCheckboxes = document.querySelectorAll('#drugIssuesContainer input[type="checkbox"]');
+      if (drugIssuesCheckboxes) {
+        drugIssuesCheckboxes.forEach(checkbox => checkbox.checked = false);
+      }
+    }
+
+
+    function loadHospitals() {
+      Swal.fire({
+        title: 'กำลังโหลดรายการโรงพยาบาล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      google.script.run.withSuccessHandler(hospitals => {
+        Swal.close();
+        const regHospital = document.getElementById("regHospital");
+        regHospital.innerHTML = '<option value="">-- กรุณาเลือกโรงพยาบาล --</option>';
+        hospitals.forEach(hospital => {
+          const option = document.createElement("option");
+          option.value = hospital;
+          option.textContent = hospital;
+          regHospital.appendChild(option);
+        });
+      }).getHospitals();
+    }
+
+    // function registerUser() {
+    //   const username = document.getElementById("regUsername").value.trim();
+    //   const password = document.getElementById("regPassword").value.trim();
+    //   const hospital = document.getElementById("regHospital").value;
+
+    //   if (!username || !password || !hospital) {
+    //     Swal.fire("กรุณากรอกข้อมูลให้ครบถ้วน", "", "warning");
+    //     return;
+    //   }
+
+    //   Swal.fire({
+    //     title: 'กำลังลงทะเบียน...',
+    //     allowOutsideClick: false,
+    //     didOpen: () => Swal.showLoading(),
+    //   });
+
+    //   google.script.run.withSuccessHandler(response => {
+    //     Swal.close();
+    //     if (response.success) {
+    //       Swal.fire("สำเร็จ!", "ลงทะเบียนเรียบร้อยแล้ว", "success").then(() => {
+    //         showLogin();
+    //       });
+    //     } else {
+    //       Swal.fire("ล้มเหลว", response.message, "error");
+    //     }
+    //   }).registerUser({ username, password, hospital });
+    // }
+
+    function showRegister() {
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("registerSection").style.display = "block";
+      // โหลดรายการโรงพยาบาลสำหรับ Register
+      loadHospitals();
+    }
+
+    function showLogin() {
+      document.getElementById("registerSection").style.display = "none";
+      document.getElementById("loginSection").style.display = "block";
+    }
+
+    function searchPatients() {
+      const searchValue = document.getElementById('searchPatient').value.toLowerCase();
+      const tableBody = document.getElementById('patientsTable');
+      const rows = tableBody.getElementsByTagName('tr');
+
+      Array.from(rows).forEach(row => {
+        const cells = row.getElementsByTagName('td');
+        const rowData = Array.from(cells)
+          .map(cell => cell.textContent.toLowerCase())
+          .join(' ');
+        if (rowData.includes(searchValue)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function filterPatients() {
+      const searchValue = document.getElementById('searchPatient').value.toLowerCase().trim();
+      const filterStatus = document.getElementById('filterStatus').value.trim(); // สถานะสุขภาพ
+      const filterDrugIssues = document.getElementById('filterDrugIssues').value.trim(); // ปัญหาการใช้ยา
+      const tableBody = document.getElementById('patientsTable');
+      const rows = tableBody.getElementsByTagName('tr');
+
+      let filteredCount = 0; // ตัวแปรสำหรับนับจำนวนคนไข้ที่ผ่านการกรอง
+
+      Array.from(rows).forEach(row => {
+        // ตรวจสอบว่าแถวนี้เป็นแถว Group By หรือไม่
+        const isGroupRow = row.getAttribute('data-group') === 'true';
+
+        if (isGroupRow) {
+          row.style.display = ''; // แสดงแถว Group By เสมอ
+          return; // ข้ามการประมวลผลแถวนี้
+        }
+
+        const cells = row.getElementsByTagName('td');
+        const name = cells[0]?.textContent.toLowerCase().trim() || ''; // ชื่อ
+        const status = cells[2]?.textContent.replace(/⚠️/g, '').trim() || ''; // สถานะสุขภาพ
+        const drugIssues = cells[3]?.textContent.trim() || ''; // ปัญหาการใช้ยา
+
+        const matchesSearch = !searchValue || name.includes(searchValue);
+        const matchesStatus = !filterStatus || status === filterStatus;
+        const matchesDrugIssues = !filterDrugIssues || drugIssues === filterDrugIssues;
+
+        if (matchesSearch && matchesStatus && matchesDrugIssues) {
+          row.style.display = ''; // แสดงแถวที่ผ่านการกรอง
+          filteredCount++; // เพิ่มจำนวนหากแถวผ่านการกรอง
+        } else {
+          row.style.display = 'none'; // ซ่อนแถวที่ไม่ผ่านการกรอง
+        }
+      });
+
+      // อัปเดตจำนวนคนไข้ที่ผ่านการกรอง
+      document.getElementById('filteredCount').textContent = `แสดงผลคนไข้ทั้งหมด: ${filteredCount}`;
+    }
+    function openCareForm(index) {
+      const patient = patients[index];
+      const careFormHtml = `
+        <div>
+          <h4>บริบาลทางเภสัชกรรม: ${patient.name}</h4>
+          <label>ยาที่ได้รับและวิธีใช้:</label>
+          <textarea id="medication" class="form-control" rows="4" placeholder="กรอกชื่อยาและวิธีใช้ เช่น Paracetamol 500 mg 1 เม็ด เช้า-เย็น"></textarea>
+          <label>การแพ้ยา:</label>
+          <input type="text" id="allergy" class="form-control" placeholder="กรอกข้อมูลการแพ้ยา">
+          <label>รายละเอียดการให้การบริบาล:</label>
+          <textarea id="careDetails" class="form-control" rows="4" placeholder="กรอกรายละเอียด"></textarea>
+          <button class="btn btn-success mt-3" onclick="savePharmaceuticalCare(${index})">บันทึก</button>
+          <button class="btn btn-secondary mt-3" onclick="cancelCareForm()">ยกเลิก</button>
+        </div>
+      `;
+
+      Swal.fire({
+        title: 'การบริบาลทางเภสัชกรรม',
+        html: careFormHtml,
+        showConfirmButton: false,
+      });
+    }
+
+    function cancelCareForm() {
+      Swal.close();
+    }
+
+    function savePharmaceuticalCare(index) {
+      const patient = patients[index];
+      const careData = {
+        medication: document.getElementById('medication').value,
+        allergy: document.getElementById('allergy').value,
+        details: document.getElementById('careDetails').value,
+      };
+
+      if (!careData.medication || !careData.allergy || !careData.details) {
+        Swal.fire("กรุณากรอกข้อมูลให้ครบถ้วน", "", "warning");
+        return;
+      }
+
+      Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      google.script.run.withSuccessHandler(response => {
+        Swal.close();
+        if (response.success) {
+          Swal.fire("สำเร็จ!", response.message, "success");
+        } else {
+          Swal.fire("ล้มเหลว", response.message, "error");
+        }
+      }).savePharmaceuticalCare(patient.uniqueId, careData);
+    }
+
+    function viewCareDetails(index) {
+      const patient = patients[index];
+
+      if (!patient.uniqueId) {
+        Swal.fire("ข้อผิดพลาด", "ไม่พบ UniqueID สำหรับผู้ป่วยรายนี้", "error");
+        return;
+      }
+
+      // แสดง Loading
+      Swal.fire({
+        title: 'กำลังโหลดข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      google.script.run.withSuccessHandler(jsonResponse => {
+        Swal.close();
+        const response = JSON.parse(jsonResponse);
+
+        if (!response || !response.success) {
+          Swal.fire('ข้อผิดพลาด', response.message || 'ไม่พบข้อมูล', 'info');
+          return;
+        }
+
+        // ฟังก์ชันแปลงรูปแบบวันที่
+        const formatTimestamp = (timestamp) => {
+          const dateObj = new Date(timestamp);
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มจาก 0
+          const year = dateObj.getFullYear();
+          const hours = String(dateObj.getHours()).padStart(2, '0');
+          const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+          return `${day}-${month}-${year} เวลา ${hours}:${minutes}`;
+        };
+
+        // สร้าง HTML สำหรับแสดงผล
+        const careDetailsHtml = response.history.map((care, i) => `
+          <div>
+            <h5>ครั้งที่ ${i + 1}</h5>
+            <p><strong>ยาที่ได้รับ:</strong> ${care.medication || 'ไม่มีข้อมูล'}</p>
+            <p><strong>การแพ้ยา:</strong> ${care.allergy || 'ไม่มีข้อมูล'}</p>
+            <p><strong>รายละเอียด:</strong> ${care.careDetails || 'ไม่มีข้อมูล'}</p>
+            <p><strong>วันที่บันทึก:</strong> ${care.timestamp ? formatTimestamp(care.timestamp) : 'ไม่มีข้อมูล'}</p>
+            <hr>
+          </div>
+        `).join('');
+
+        // เพิ่มเนื้อหาใน Modal
+        document.getElementById('careDetailsContent').innerHTML = careDetailsHtml;
+
+        // แสดง Modal
+        const modal = new bootstrap.Modal(document.getElementById('careDetailsModal'));
+        modal.show();
+      }).getPharmaceuticalHistory(patient.uniqueId);
+    }
+    function loadUserStatistics() {
+      if (!currentUser || !currentUser.username) {
+        console.error("currentUser ไม่ถูกกำหนดหรือไม่มี username");
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลผู้แสวงบุญได้ กรุณาลองใหม่อีกครั้ง', 'error');
+        return;
+      }
+
+      if (currentUser.hospital === 'Admin') {
+        const screeningButton = document.querySelector('button[onclick="toggleEditInputs()"]');
+        if (screeningButton) {
+          screeningButton.style.display = 'none'; // ซ่อนปุ่มคัดกรอง
+        }
+        const editInputs = document.getElementById('editInputs');
+        if (editInputs) {
+          editInputs.style.display = 'none'; // ซ่อนฟอร์มแก้ไข
+        }
+      }
+
+      google.script.run.withSuccessHandler(response => {
+        if (response.success) {
+          // ดึงข้อมูลจาก response
+          const totalPilgrims = response.totalPilgrims;
+          const pilgrimsInCharge = response.pilgrimsInCharge;
+          const pilgrimsScreened = response.pilgrimsScreened;
+
+          // คำนวณเปอร์เซ็นต์
+          const responsiblePercentage = ((pilgrimsInCharge / totalPilgrims) * 100).toFixed(2);
+          const screenedPercentage = ((pilgrimsScreened / pilgrimsInCharge) * 100).toFixed(2);
+          const screenedTotalPercentage = ((pilgrimsScreened / totalPilgrims) * 100).toFixed(2);
+
+          // อัปเดต DOM
+          document.getElementById('totalPilgrims').textContent = totalPilgrims;
+          document.getElementById('pilgrimsInCharge').textContent = pilgrimsInCharge;
+          document.getElementById('pilgrimsScreened').textContent = pilgrimsScreened;
+          document.getElementById('responsiblePercentage').textContent = `${responsiblePercentage}%`;
+          document.getElementById('screenedPercentage').textContent = `${screenedPercentage}%`;
+          document.getElementById('screenedTotalPercentage').textContent = `${screenedTotalPercentage}%`;
+        } else {
+          Swal.fire('ข้อผิดพลาด', response.message, 'error');
+        }
+      }).getUserStatistics(currentUser.username, currentUser.hospital === 'Admin');
+    }
+
+
+
+    function updatePilgrimData() {
+      const newInCharge = parseInt(document.getElementById('editPilgrimsInCharge').value.trim(), 10);
+      const newScreened = parseInt(document.getElementById('editPilgrimsScreened').value.trim(), 10);
+
+      if (isNaN(newInCharge) || isNaN(newScreened)) {
+        Swal.fire("ข้อผิดพลาด", "กรุณากรอกข้อมูลให้ครบถ้วน", "error");
+        return;
+      }
+
+      // อัปเดตใน Google Sheets ผ่าน Google Apps Script
+      const data = {
+        username: currentUser.username,
+        pilgrimsInCharge: newInCharge,
+        pilgrimsScreened: newScreened,
+      };
+
+      Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      google.script.run
+        .withSuccessHandler(response => {
+          Swal.close();
+          if (response.success) {
+            // อัปเดตใน UI
+            document.getElementById('pilgrimsInCharge').textContent = newInCharge;
+            document.getElementById('pilgrimsScreened').textContent = newScreened;
+
+            const totalPilgrims = parseInt(document.getElementById('totalPilgrims').textContent, 10);
+            const responsiblePercentage = ((newInCharge / totalPilgrims) * 100).toFixed(2);
+            const screenedPercentage = ((newScreened / newInCharge) * 100).toFixed(2);
+            const screenedTotalPercentage = ((newScreened / totalPilgrims) * 100).toFixed(2);
+
+            // อัปเดตเปอร์เซ็นต์ใน UI
+            document.getElementById('responsiblePercentage').textContent = `${responsiblePercentage}%`;
+            document.getElementById('screenedPercentage').textContent = `${screenedPercentage}%`;
+            document.getElementById('screenedTotalPercentage').textContent = `${screenedTotalPercentage}%`;
+
+            const editInputs = document.getElementById('editInputs');
+            editInputs.style.display = 'none';
+
+            Swal.fire("สำเร็จ!", response.message, "success");
+          } else {
+            Swal.fire("ข้อผิดพลาด", response.message, "error");
+          }
+        })
+        .withFailureHandler(error => {
+          Swal.close();
+          console.error('Error:', error);
+          Swal.fire("ข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
+        })
+        .updateUserStatistics(data);
+    }
+
+
+
+    function showPilgrimChart() {
+      Swal.fire({
+        title: 'กราฟแสดงข้อมูลผู้แสวงบุญ',
+        html: '<canvas id="popupPilgrimsChart" width="400" height="200"></canvas>',
+        showCloseButton: true,
+        showConfirmButton: false,
+        width: '600px',
+        didOpen: () => {
+          const canvasElement = document.getElementById('popupPilgrimsChart');
+          if (!canvasElement) {
+            console.error("Canvas element ไม่พบใน DOM");
+            return;
+          }
+
+          const ctx = canvasElement.getContext('2d');
+
+          // ดึงค่าจาก DOM
+          const totalPilgrims = parseInt(document.getElementById('totalPilgrims').textContent, 10);
+          const pilgrimsInCharge = parseInt(document.getElementById('pilgrimsInCharge').textContent, 10);
+          const pilgrimsScreened = parseInt(document.getElementById('pilgrimsScreened').textContent, 10);
+
+          // คำนวณเปอร์เซ็นต์
+          const responsiblePercentage = ((pilgrimsInCharge / totalPilgrims) * 100).toFixed(2);
+          const screenedPercentage = ((pilgrimsScreened / pilgrimsInCharge) * 100).toFixed(2);
+          const screenedTotalPercentage = ((pilgrimsScreened / totalPilgrims) * 100).toFixed(2);
+
+          // สร้างกราฟ
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: [
+                'เปอร์เซ็นต์ที่รับผิดชอบ',
+                'เปอร์เซ็นต์ที่คัดกรอง (รับผิดชอบ)',
+                'เปอร์เซ็นต์ที่คัดกรอง (ทั้งหมด)'
+              ],
+              datasets: [{
+                label: 'เปอร์เซ็นต์ (%)',
+                data: [responsiblePercentage, screenedPercentage, screenedTotalPercentage],
+                backgroundColor: ['#28a745', '#ffc107', '#007bff'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100
+                }
+              }
+            }
+          });
+        }
+      });
+    }
+
+    function toggleEditInputs() {
+      const editInputs = document.getElementById('editInputs');
+      const pilgrimsInCharge = document.getElementById('pilgrimsInCharge').textContent.trim();
+      const pilgrimsScreened = document.getElementById('pilgrimsScreened').textContent.trim();
+
+      if (editInputs.style.display === 'none') {
+        // ตั้งค่า default ให้กับ input
+        document.getElementById('editPilgrimsInCharge').value = pilgrimsInCharge;
+        document.getElementById('editPilgrimsScreened').value = pilgrimsScreened;
+
+        // แสดง input
+        editInputs.style.display = 'flex';
+      } else {
+        // ซ่อน input
+        editInputs.style.display = 'none';
+      }
+    }
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
