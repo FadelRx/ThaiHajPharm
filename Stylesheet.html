@@ -1,0 +1,224 @@
+<style>
+    body {
+      font-family: 'Itim', sans-serif;
+      background-color: #f8f9fa;
+      background-size: cover;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-section {
+      background-color: #e9f7ef;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .form-title {
+      font-size: 1.5rem;
+      color: #28a745;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #495057;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-primary {
+      background-color: #28a745;
+      border: none;
+    }
+    .btn-secondary {
+      background-color: #ffc107;
+      border: none;
+    }
+
+    h2, h3, h4 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .btn-primary:hover {
+      background-color: #283593;
+      border-color: #283593;
+    }
+    .btn-success {
+      background-color: #2e7d32;
+      border-color: #2e7d32;
+    }
+    .btn-success:hover {
+      background-color: #1b5e20;
+      border-color: #1b5e20;
+    }
+    .btn-danger {
+      background-color: #c62828;
+      border-color: #c62828;
+    }
+    .btn-danger:hover {
+      background-color: #b71c1c;
+      border-color: #b71c1c;
+    }
+    .table-bordered th {
+      background-color: #eceff1;
+      color: #37474f;
+      text-align: center;
+    }
+    /* ตั้งค่าฟอนต์สำหรับตาราง */
+    table {
+      font-size: 14px; /* ขนาดฟอนต์สำหรับข้อความในตาราง */
+    }
+    
+    /* เพิ่มความสม่ำเสมอสำหรับเซลล์ในตาราง */
+    table td, table th {
+      font-size: 14px; /* ขนาดฟอนต์สำหรับทั้งส่วนหัวและข้อมูล */
+      vertical-align: middle; /* จัดข้อความให้อยู่ตรงกลางแนวตั้ง */
+    }
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      color: #607d8b;
+      font-size: 14px;
+    }
+    .form-select {
+      background-color: #e3f2fd;
+      border-radius: 8px;
+    }
+    .form-control {
+      background-color: #fafafa;
+      border-radius: 8px;
+    }
+    .form-label {
+      font-weight: bold;
+      color: #37474f;
+    }
+    .status-circle {
+      display: inline-block;
+      width: 20px; /* กำหนดขนาดวงกลม */
+      height: 20px;
+      border-radius: 50%; /* ทำให้เป็นวงกลม */
+      margin-right: 8px; /* เว้นระยะห่างจากข้อความ */
+    }
+
+    .status-green { background-color: green; }
+    .status-yellow { background-color: orange; }
+    .status-red { background-color: red; }
+    .status-gray { background-color: gray; }
+    .table tbody td {
+      text-align: center; /* ทำให้ข้อมูลในตารางอยู่ตรงกลาง */
+      vertical-align: middle; /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
+    }
+    .warning-icon {
+      display: inline-block;
+      color: red;
+      font-size: 16px;
+      animation: blink 1s infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .header-container {
+      display: flex;
+      align-items: center; /* จัดให้อยู่ตรงกลางในแนวตั้ง */
+      justify-content: space-between; /* เว้นระยะห่างระหว่างโลโก้และหัวข้อ */
+      padding: 10px;
+    }
+
+    .logo-left, .logo-right {
+      width: 100px; /* ขนาดของโลโก้ */
+      height: auto;
+    }
+
+    .header-title {
+      text-align: center;
+      flex-grow: 1; /* ขยายส่วนหัวข้อให้อยู่ตรงกลาง */
+    }
+    /* Media Queries สำหรับหน้าจอเล็ก */
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: column; /* จัดเรียงเป็นคอลัมน์ในหน้าจอเล็ก */
+      text-align: center;
+    }
+
+    .logo {
+      width: 50px; /* ลดขนาดโลโก้ */
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+    }
+
+    .container {
+      padding: 10px; /* ลดระยะขอบ */
+    }
+  }
+
+  /* Media Queries สำหรับหน้าจอมือถือ */
+  @media (max-width: 480px) {
+    .logo {
+      width: 40px; /* ลดขนาดโลโก้ลงอีก */
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+
+    .container {
+      padding: 5px;
+    }
+  }
+
+  .statistics-section {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+  }
+
+  .statistics-section.compact {
+    padding: 5px;
+    font-size: 14px;
+  }
+
+  .statistics-section h5 {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #343a40;
+  }
+  .statistics-section p {
+    margin: 0;
+    font-size: 12px;
+  }
+  .form-control-sm {
+    font-size: 12px;
+    height: 30px;
+    padding: 5px;
+  }
+  .btn-sm {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  </style>

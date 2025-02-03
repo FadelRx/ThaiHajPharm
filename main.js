@@ -1,7 +1,13 @@
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  return HtmlService.createTemplateFromFile('Index')
+    .evaluate()
     .setTitle('DRPMS')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+// ฟังก์ชัน include() ใช้เรียกไฟล์ HTML อื่นๆ
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 // ตรวจสอบ Login
