@@ -108,19 +108,39 @@
             <td>${patient.hospital}</td>
             <td><span class="status-circle ${statusClass}"></span>${patient.status} ${warningIcon}</td>
             <td>${patient.drugIssues.replace(/, /g, ', ')}</td> <!-- แสดงทีละบรรทัด -->
-            <td>
-              <button class="btn btn-info btn-sm me-2" onclick="showPatientDetails(${index})">รายละเอียด</button>
-              <button class="btn btn-success btn-sm me-2" onclick="openCareForm(${index})">Pharm Care+</button>
-              <button class="btn btn-secondary btn-sm" onclick="viewCareDetails(${index})">Care Detail</button>
-              ${
-                currentUser.hospital !== 'Admin'
-                  ? `
-                  <button class="btn btn-warning btn-sm me-2" onclick="editPatient(${index})">แก้ไข</button>
-                  <button class="btn btn-danger btn-sm" onclick="deletePatient(${index})">ลบ</button>
-                  `
-                  : ''
-              }
+            <td class="text-center">
+              <div class="d-flex justify-content-center">
+                <!-- ปุ่ม Information -->
+                <div class="btn-group me-3"> <!-- เพิ่ม margin-right (me-3) เพื่อเว้นระยะห่าง -->
+                  <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Information
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="showPatientDetails(${index})">📋 รายละเอียด</a></li>
+                    ${
+                      currentUser.hospital !== 'Admin'
+                        ? `
+                          <li><a class="dropdown-item" href="#" onclick="editPatient(${index})">✏️ แก้ไข</a></li>
+                          <li><a class="dropdown-item text-danger" href="#" onclick="deletePatient(${index})">🗑️ ลบ</a></li>
+                        `
+                        : ''
+                    }
+                  </ul>
+                </div>
+
+                <!-- ปุ่ม Care -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Care
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="openCareForm(${index})">🩺 Pharm Care+</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="viewCareDetails(${index})">📜 Care Detail</a></li>
+                  </ul>
+                </div>
+              </div>
             </td>
+
           `;
           tableBody.appendChild(row);
 
@@ -488,12 +508,31 @@
         didOpen: () => Swal.showLoading(),
       });
 
-      google.script.run.withSuccessHandler(jsonResponse => {
+      google.script.run.withSuccessHandler(response => {
         Swal.close();
-        const response = JSON.parse(jsonResponse);
 
-        if (!response || !response.success) {
-          Swal.fire('ข้อผิดพลาด', response.message || 'ไม่พบข้อมูล', 'info');
+        let data;
+        
+        try {
+          // ตรวจสอบว่า response เป็น Object หรือ String
+          if (typeof response === "string") {
+            data = JSON.parse(response);  // ถ้าเป็น string, ให้แปลงเป็น JSON
+          } else {
+            data = response;  // ถ้าเป็น object อยู่แล้ว ใช้ได้เลย
+          }
+        } catch (error) {
+          console.error("JSON Parse Error:", error, response);
+          Swal.fire("ข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลได้", "error");
+          return;
+        }
+
+        // ตรวจสอบว่ามีข้อมูลประวัติการบริบาลหรือไม่
+        if (!data || !data.success || !data.history || data.history.length === 0) {
+          Swal.fire({
+            title: 'ไม่มีประวัติการบริบาล',
+            text: 'ไม่พบข้อมูลประวัติการบริบาลของผู้ป่วยรายนี้',
+            icon: 'info'
+          });
           return;
         }
 
@@ -509,13 +548,14 @@
         };
 
         // สร้าง HTML สำหรับแสดงผล
-        const careDetailsHtml = response.history.map((care, i) => `
+        const careDetailsHtml = data.history.map((care, i) => `
           <div>
             <h5>ครั้งที่ ${i + 1}</h5>
             <p><strong>ยาที่ได้รับ:</strong> ${care.medication || 'ไม่มีข้อมูล'}</p>
             <p><strong>การแพ้ยา:</strong> ${care.allergy || 'ไม่มีข้อมูล'}</p>
             <p><strong>รายละเอียด:</strong> ${care.careDetails || 'ไม่มีข้อมูล'}</p>
             <p><strong>วันที่บันทึก:</strong> ${care.timestamp ? formatTimestamp(care.timestamp) : 'ไม่มีข้อมูล'}</p>
+            <button class="btn btn-warning btn-sm mt-2" onclick="editCareRecord('${patient.uniqueId}', ${i})">แก้ไข</button>
             <hr>
           </div>
         `).join('');
@@ -526,8 +566,11 @@
         // แสดง Modal
         const modal = new bootstrap.Modal(document.getElementById('careDetailsModal'));
         modal.show();
+
       }).getPharmaceuticalHistory(patient.uniqueId);
     }
+
+
     function loadUserStatistics() {
       if (!currentUser || !currentUser.username) {
         console.error("currentUser ไม่ถูกกำหนดหรือไม่มี username");
@@ -705,4 +748,99 @@
       }
     }
 
-  </script>
+    function editCareRecord(uniqueId, careIndex) {
+      Swal.fire({
+          title: 'กำลังโหลดข้อมูล...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+      });
+
+      google.script.run.withSuccessHandler(jsonResponse => {
+          Swal.close();
+          const response = JSON.parse(jsonResponse);
+
+          if (!response || !response.success || !response.history[careIndex]) {
+              Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลการบริบาลที่ต้องการแก้ไข', 'error');
+              return;
+          }
+
+          const care = response.history[careIndex];
+
+          // ฟอร์มแก้ไข
+          const editFormHtml = `
+            <div>
+              <h4>แก้ไขการบริบาลทางเภสัชกรรม</h4>
+              <label>ยาที่ได้รับและวิธีใช้:</label>
+              <textarea id="editMedication" class="form-control" rows="4">${care.medication || ''}</textarea>
+              
+              <label>การแพ้ยา:</label>
+              <input type="text" id="editAllergy" class="form-control" value="${care.allergy || ''}">
+
+              <label>รายละเอียดการให้การบริบาล:</label>
+              <textarea id="editCareDetails" class="form-control" rows="4">${care.careDetails || ''}</textarea>
+
+              <button class="btn btn-success mt-3" onclick="saveEditedCare('${uniqueId}', ${careIndex})">บันทึกการแก้ไข</button>
+              <button class="btn btn-secondary mt-3" onclick="cancelEditCare()">ยกเลิก</button>
+            </div>
+          `;
+
+          console.log("Before opening modal:", {
+            medication: care.medication,
+            allergy: care.allergy,
+            details: care.careDetails
+          });
+
+          Swal.fire({
+            title: 'แก้ไขการบริบาลทางเภสัชกรรม',
+            html: editFormHtml,
+            showConfirmButton: false,
+            allowOutsideClick: false, // ป้องกันการปิด SweetAlert ถ้าคลิกข้างนอก
+            focusConfirm: false, // ไม่ให้บังคับโฟกัสปุ่ม Confirm
+            didOpen: () => {
+              document.getElementById('editMedication').removeAttribute('readonly'); // ปลดล็อกการแก้ไข
+              document.getElementById('editMedication').focus(); // ให้ cursor เริ่มที่ช่องนี้
+            }
+          });
+          setTimeout(() => {
+            document.getElementById('editMedication').style.pointerEvents = 'auto';
+            document.getElementById('editAllergy').style.pointerEvents = 'auto';
+            document.getElementById('editCareDetails').style.pointerEvents = 'auto';
+          }, 100);
+      }).getPharmaceuticalHistory(uniqueId);
+   }
+
+  function saveEditedCare(uniqueId, careIndex) {
+    const editedCareData = {
+        medication: document.getElementById('editMedication').value,
+        allergy: document.getElementById('editAllergy').value,
+        details: document.getElementById('editCareDetails').value
+    };
+
+    if (!editedCareData.medication || !editedCareData.allergy || !editedCareData.details) {
+        Swal.fire("กรุณากรอกข้อมูลให้ครบถ้วน", "", "warning");
+        return;
+    }
+
+    Swal.fire({
+        title: 'กำลังบันทึกข้อมูล...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+    });
+
+    google.script.run.withSuccessHandler(response => {
+        Swal.close();
+        if (response.success) {
+            Swal.fire("สำเร็จ!", "บันทึกข้อมูลเรียบร้อยแล้ว", "success").then(() => {
+                viewCareDetails(careIndex); // โหลดข้อมูลใหม่
+            });
+        } else {
+            Swal.fire("ล้มเหลว", response.message, "error");
+        }
+    }).updatePharmaceuticalCare(uniqueId, careIndex, editedCareData);
+  }
+
+  function cancelEditCare() {
+    Swal.close();
+  }
+
+</script>

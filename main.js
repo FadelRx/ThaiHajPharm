@@ -157,6 +157,7 @@ function savePharmaceuticalCare(uniqueId, careData) {
     careData.allergy,
     careData.details,
     new Date().toLocaleString(),
+    careData.recordId,
   ]);
 
   return { success: true, message: "บันทึกข้อมูลการบริบาลเรียบร้อยแล้ว" };
@@ -257,4 +258,33 @@ function updateUserStatistics(data) {
 
   return { success: true, message: 'อัปเดตข้อมูลสำเร็จ' };
 }
+
+function updatePharmaceuticalCare(uniqueId, careIndex, editedCareData) {
+  var sheet = SpreadsheetApp.openById('1qFy0whbR2YDKCT5x1kPpnMjMxnIk2csZZBHUAWB1uIc').getSheetByName('pharmaceutical_care');
+  var data = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < data.length; i++) {
+      if (data[i][0] == uniqueId) { // Column A = UniqueID
+          var history = JSON.parse(data[i][1]); // Column B = JSON History
+
+          if (!history[careIndex]) {
+              return { success: false, message: "ไม่พบข้อมูลการบริบาลที่ต้องการแก้ไข" };
+          }
+
+          // อัปเดตข้อมูลที่แก้ไข
+          history[careIndex].medication = editedCareData.medication;
+          history[careIndex].allergy = editedCareData.allergy;
+          history[careIndex].careDetails = editedCareData.details;
+          history[careIndex].timestamp = new Date().toISOString(); // บันทึกเวลาล่าสุด
+
+          // บันทึกกลับไปที่ Google Sheets
+          sheet.getRange(i + 1, 2).setValue(JSON.stringify(history));
+
+          return { success: true };
+      }
+  }
+  return { success: false, message: "ไม่พบข้อมูลผู้ป่วย" };
+}
+
+
 
