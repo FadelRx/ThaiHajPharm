@@ -286,5 +286,34 @@ function updatePharmaceuticalCare(uniqueId, careIndex, editedCareData) {
   return { success: false, message: "ไม่พบข้อมูลผู้ป่วย" };
 }
 
+function deletePharmaceuticalCare(uniqueId, careIndex) {
+  var sheet = SpreadsheetApp.openById('1qFy0whbR2YDKCT5x1kPpnMjMxnIk2csZZBHUAWB1uIc').getSheetByName('pharmaceutical_care');
+  if (!sheet) return { success: false, message: "ไม่พบชีตบันทึกข้อมูล" };
 
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const uniqueIdIndex = headers.indexOf("uniqueId");
+
+  if (uniqueIdIndex === -1) return { success: false, message: "ไม่พบคอลัมน์ UniqueID" };
+
+  let rowIndex = -1;
+  let count = 0; // นับลำดับ careIndex ที่ตรงกับ uniqueId
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][uniqueIdIndex] === uniqueId) {
+      if (count === careIndex) {
+        rowIndex = i + 1;
+        break;
+      }
+      count++;
+    }
+  }
+
+  if (rowIndex === -1) {
+    return { success: false, message: "ไม่พบข้อมูลที่ต้องการลบ" };
+  }
+
+  sheet.deleteRow(rowIndex); // ลบแถวที่พบ
+  return { success: true, message: "ลบข้อมูลสำเร็จ" };
+}
 
